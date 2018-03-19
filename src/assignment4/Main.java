@@ -1,15 +1,18 @@
 package assignment4;
 /* CRITTERS Main.java
  * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ *
+ * Elvin J. Galarza
+ * ejg2298
+ * 15455
+ *
+ * Bianca Antonio
+ * bla774
+ * 15510
+ *
  * Slip days used: <0>
- * Fall 2016
+ * Spring 2018
+ *
  */
 
 import java.util.Scanner;
@@ -69,9 +72,54 @@ public class Main {
 
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
-        
-        // System.out.println("GLHF");
-        
+
+        while(true){
+            int flag = 0;
+            /* display the end user prompt */
+            System.out.print("critters>");
+            /* Create a String array that contains all of the user's input */
+            String user_input = kb.nextLine().toLowerCase();
+            String[] user_input_args = user_input.split("\\s+"); /* strip the whitepsace */
+
+            for(int i = 0; i < user_input_args.length; i++){
+                if(user_input_args[i].equals("quit")){
+                    flag = 1;
+                    break;
+                }
+
+                if(user_input_args[i].equals("show")){
+                    Critter.displayWorld();
+                }
+
+                if(user_input_args[i].equals("step")){
+                    int numSteps = 0;
+
+                    /* if step command is the last command */
+                    if(i == user_input_args.length-1){
+                        numSteps = 1;
+                    }
+                    /* if step command isn't the last command */
+                    else{
+                        try{
+                            numSteps = Integer.parseInt(user_input_args[i]);
+                        }
+                        catch(NumberFormatException nfe){
+                            System.out.println("error processing: step " + user_input_args[i+1]);
+                        }
+                    }
+
+                    /* carry out the steps */
+                    for(int j = 0; j < numSteps; i++){
+                        Critter.worldTimeStep();
+                    }
+                }
+            }
+            /* if quit flag was set, terminate program */
+            if(flag == 1){
+                break;
+            }
+        }
+
         /* Write your code above */
         System.out.flush();
 

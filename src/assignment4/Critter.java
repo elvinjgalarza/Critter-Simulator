@@ -1,18 +1,24 @@
 package assignment4;
 /* CRITTERS Critter.java
  * EE422C Project 4 submission by
- * Replace <...> with your actual data.
- * <Student1 Name>
- * <Student1 EID>
- * <Student1 5-digit Unique No.>
- * <Student2 Name>
- * <Student2 EID>
- * <Student2 5-digit Unique No.>
+ *
+ * Elvin J. Galarza
+ * ejg2298
+ * 15455
+ *
+ * Bianca Antonio
+ * bla774
+ * 15510
+ *
  * Slip days used: <0>
- * Fall 2016
+ * Spring 2018
+ *
  */
 
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /* see the PDF for descriptions of the methods and fields in this class
@@ -42,15 +48,56 @@ public abstract class Critter {
 	
 	
 	/* a one-character long string that visually depicts your critter in the ASCII interface */
-	public String toString() { return ""; }
+	public String toString() {
+		return "";
+	}
 	
 	private int energy = 0;
-	protected int getEnergy() { return energy; }
+	protected int getEnergy() {
+		return energy;
+	}
 	
 	private int x_coord;
 	private int y_coord;
-	
+	private boolean moved; /* tells us if the Critter has moved (true) during this time */
+
+
+	/* -------------- */
+
+
+	/**
+	 * This function moves the Critter in a given direction
+	 * and steps. Keep in mind that the map is numbered like
+	 * a matrix ( think: Battleship gameboard). So we start
+	 * from (0,0) and increase in x as we go right and increase
+	 * in y as we go down.
+	 * @param direction direction the Critter moves in
+	 *                  0 = straight right(increasing x, no change in y)
+	 *                  1 = diagonally up and to the right (decreasing y, increasing x)
+	 *                  2 = straight up (decreasing y)
+	 * @param steps amount of steps the Critter takes
+	 */
+	private final void move(int direction, int steps){
+		int newX = x_coord;
+		int newY = y_coord;
+
+	}
+
+
+
+
+	/* ------------- */
+
+
 	protected final void walk(int direction) {
+		this.energy = this.energy - Params.walk_energy_cost;
+		if(moved == true){
+			return;
+		}
+		else{
+			this.move(direction, 1);
+			moved = true;
+		}
 	}
 	
 	protected final void run(int direction) {
@@ -62,7 +109,10 @@ public abstract class Critter {
 
 	public abstract void doTimeStep();
 	public abstract boolean fight(String oponent);
-	
+
+
+
+	/* CRITTER COLLECTION: STAGE ONE */
 	/**
 	 * create and initialize a Critter subclass.
 	 * critter_class_name must be the unqualified name of a concrete subclass of Critter, if not,
@@ -74,8 +124,22 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
+
+		try{
+			/* check input first */
+			Critter newCritter = (Critter) Class.forName(myPackage + "." + critter_class_name).newInstance();
+			/* add  the newCritter to the world's population */
+			Critter.population.add(newCritter);
+			/* give the newCritter its starting energy */
+			newCritter.energy = Params.start_energy;
+			/* give the newCritter a random start position in the world */
+			newCritter.x_coord = Critter.getRandomInt(Params.world_width);
+			newCritter.y_coord = Critter.getRandomInt(Params.world_height);
+		}
+		catch(ClassNotFoundException|InstantiationException|IllegalAccessException exception){
+			throw new InvalidCritterException(critter_class_name);
+		}
 	}
-	
 	/**
 	 * Gets a list of critters of a specific type.
 	 * @param critter_class_name What kind of Critter is to be listed.  Unqualified class name.
@@ -84,7 +148,22 @@ public abstract class Critter {
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
+
+		Class<? extends Critter> get_list = null;
+
+		try{
+			get_list = Class.forName(myPackage + "." + critter_class_name).asSubclass(Critter.class);
+		}
+		catch(ClassNotFoundException critter){
+			throw new InvalidCritterException(critter_class_name);
+		}
+
+		for(Critter critter: population){
+			if(get_list.isInstance(critter)){
+				result.add(critter);
+			}
+		}
+
 		return result;
 	}
 	
@@ -168,14 +247,91 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		// Complete this method.
+		population.clear();
+		babies.clear();
 	}
-	
+
+	/* Time Steps: STAGE 1 */
+	/**
+	 * Simulation consists of a sequence of time steps. During
+	 * each step, the state of all Critters in simulation is
+	 * updated, new critters may be added, and critters may be
+	 * removed (births and deaths). All core functionality is
+	 * associated with time steps.
+	 *
+	 * > Simulates one time step for every Critter in the
+	 *   critter collection (i.e., entire world).
+	 */
 	public static void worldTimeStep() {
-		// Complete this method.
+		/*
+		 * 1. increment timestep; timestep++;
+		 * 2. doTimeSteps();
+		 * 3. Do the fights. doEncounters();
+		 * 4. updateRestEnergy();
+		 * 5. Generate Algae genAlgae();
+		 * 6. Move babies to general population. population.addAll(babies); babies.clear();
+		 *
+		 */
+
+		/* 1) */
+		for(Critter critter : population){
+			critter.doTimeStep();
+		}
+
+		/* 2)
+		 * First, find fights.
+		 * Then, simulate fighting.
+		 */
+
 	}
-	
+
+	/**
+	 * Helper function for worldTimeStep method. Finds all
+	 * the critters that share the same spot in the world.
+	 * @return Returns ArrayList of Lists of Critters that
+	 * 		   share the same spot.
+	 */
+
+	/**
+	 * Display board in grid form (LxW).
+	 */
 	public static void displayWorld() {
-		// Complete this method.
+		String[][] board = new String[Params.world_height][Params.world_width];
+
+		for(Critter c : population){
+			System.out.println("DO THIS");
+		}
+
+		/* print top border */
+		displayBorder();
+
+		/* print the critters/empty spaces */
+		for(int columns = 0; columns < Params.world_width; columns++){
+			System.out.print('|');
+			/* if a space is empty, print a space
+			   else print whatever is in it
+			 */
+			for(int rows = 0; rows < Params.world_height; rows++){
+				if(board[columns][rows] == null){
+					System.out.print(' ');
+				}
+				else{
+					System.out.print(board[columns][rows]);
+				}
+			}
+			System.out.print('|');
+		}
+
+		/* print bottom border */
+		displayBorder();
+
+	}
+
+	private static void displayBorder(){
+		System.out.print("+");
+		for(int i = 0; i < Params.world_width; i++) {
+			System.out.print("-");
+		}
+		System.out.println("+");
 	}
 }
