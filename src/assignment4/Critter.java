@@ -35,17 +35,11 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
-
-	private static int time_step = 0;
-	private static boolean fighting = false;
-
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
 	}
-	
 	private static java.util.Random rand = new java.util.Random();
-
 	/**
 	 * Generates a random int from 0 to max - 1
 	 * @param max from setSeed
@@ -54,7 +48,6 @@ public abstract class Critter {
 	public static int getRandomInt(int max) {
 		return rand.nextInt(max);
 	}
-
 	/**
 	 * Sets the seed needed for the random number generatro that is used
 	 * in getRandomInt
@@ -63,22 +56,28 @@ public abstract class Critter {
 	public static void setSeed(long new_seed) {
 		rand = new java.util.Random(new_seed);
 	}
-	
-	
 	/* a one-character long string that visually depicts your critter in the ASCII interface */
 	public String toString() {
 		return "";
 	}
-	
+
+
+
+
+
 	private int energy = 0;
 	protected int getEnergy() {
 		return energy;
 	}
-	
+
+
+
 	private int x_coord;
 	private int y_coord;
-	private boolean moved; /* tells us if the Critter has moved (true) during this time */
-
+	/* my variables */
+	private static int time_step = 0; /* time step counter */
+	private static boolean fighting = false; /* tells us if the Critter is fighting (true if so) during this time step*/
+	private boolean moved; /* tells us if the Critter has moved (true if so) during this time step */
 
 	/**
 	 * This function moves the Critter in a given direction
@@ -102,9 +101,9 @@ public abstract class Critter {
 	private final void move(int direction, int steps){
 		int newX = x_coord;
 		int newY = y_coord;
-		/* debugging
+		/* debugging */
 		System.out.println("Direction: " + direction);
-		System.out.println("Old Coordinate: " + newX + " " + newY); */
+		System.out.println("Old Coordinate: " + newX + " " + newY);
 
 		switch(direction){
 
@@ -198,8 +197,8 @@ public abstract class Critter {
 			x_coord = newX;
 			y_coord = newY;
 		}
-		/* debugging
-		System.out.println("New Coordinate: " + x_coord + " " + y_coord); */
+		/* debugging */
+		System.out.println("New Coordinate: " + x_coord + " " + y_coord);
 	}
 	/* helper functions for move method that wraps
 	   the Critter around the map (TORUS)*/
@@ -221,8 +220,8 @@ public abstract class Critter {
 	protected final void walk(int direction) {
 		this.energy = this.energy - Params.walk_energy_cost;
 		if(moved == false){
-			moved = true;
 			move(direction, 1);
+			moved = true;
 		}
 	}
 
@@ -235,8 +234,8 @@ public abstract class Critter {
 	protected final void run(int direction) {
 		this.energy = this.energy - Params.run_energy_cost;
 		if(moved == false){
-			moved = true;
 			move(direction, 2);
+			moved = true;
 		}
 	}
 
@@ -326,7 +325,7 @@ public abstract class Critter {
 
 		return result;
 	}
-	
+
 	/**
 	 * Prints out how many Critters of each type there are on the board.
 	 * @param critters List of Critters.
@@ -348,13 +347,13 @@ public abstract class Critter {
 			System.out.print(prefix + s + ":" + critter_count.get(s));
 			prefix = ", ";
 		}
-		System.out.println();		
+		System.out.println();
 	}
-	
-	/* the TestCritter class allows some critters to "cheat". If you want to 
+
+	/* the TestCritter class allows some critters to "cheat". If you want to
 	 * create tests of your Critter model, you can create subclasses of this class
-	 * and then use the setter functions contained here. 
-	 * 
+	 * and then use the setter functions contained here.
+	 *
 	 * NOTE: you must make sure that the setter functions work with your implementation
 	 * of Critter. That means, if you're recording the positions of your critters
 	 * using some sort of external grid or some other data structure in addition
@@ -365,23 +364,23 @@ public abstract class Critter {
 		protected void setEnergy(int new_energy_value) {
 			super.energy = new_energy_value;
 		}
-		
+
 		protected void setX_coord(int new_x_coord) {
 			super.x_coord = new_x_coord;
 		}
-		
+
 		protected void setY_coord(int new_y_coord) {
 			super.y_coord = new_y_coord;
 		}
-		
+
 		protected int getX_coord() {
 			return super.x_coord;
 		}
-		
+
 		protected int getY_coord() {
 			return super.y_coord;
 		}
-		
+
 
 		/*
 		 * This method getPopulation has to be modified by you if you are not using the population
@@ -391,11 +390,11 @@ public abstract class Critter {
 		protected static List<Critter> getPopulation() {
 			return population;
 		}
-		
+
 		/*
 		 * This method getBabies has to be modified by you if you are not using the babies
 		 * ArrayList that has been provided in the starter code.  In any case, it has to be
-		 * implemented for grading tests to work.  Babies should be added to the general population 
+		 * implemented for grading tests to work.  Babies should be added to the general population
 		 * at either the beginning OR the end of every timestep.
 		 */
 		protected static List<Critter> getBabies() {
@@ -450,7 +449,7 @@ public abstract class Critter {
 		updateRestEnergy();
 
 		/* 5 */
-		genAlgae();
+		//genAlgae();
 
 		/* 6 */
 		population.addAll(babies);
@@ -470,6 +469,7 @@ public abstract class Critter {
 			if(checkCritter.energy <= 0){
 				population.remove(i);
 			}
+			/* reset ability to move */
 			checkCritter.moved = false;
 		}
 	}
@@ -486,10 +486,72 @@ public abstract class Critter {
 	private static void doEncounters(){
 		fighting = true;
 		ArrayList<List<Critter>> encounters = findEncounters();
-		
+		battleEncounters(encounters);
+		fighting = false;
 	}
 
 
+
+	private static void battleEncounters(ArrayList<List<Critter>> encounters){
+		for(List<Critter> critter : encounters) {
+
+			Critter A = (Critter) encounters.get(0);
+			Critter B = (Critter) encounters.get(1);
+
+			if (population.contains(A) && population.contains(B)){
+
+				boolean AChoosesFight = A.fight(B.toString());
+				boolean BChoosesFight = B.fight(B.toString());
+				boolean critterDied = false;
+
+				/* check if CrittersA/B died from fight */
+				if(A.energy <= 0){
+					population.remove(A);
+					critterDied = true;
+				}
+				if(B.energy <= 0){
+					population.remove(B);
+					critterDied = true;
+				}
+
+				/* if no one died, and CrittersA/B are on same spot still,
+				   then generate two random numbers via dice roll */
+				if(critterDied == false && A.x_coord == B.x_coord && A.y_coord == B.y_coord){
+					int aAttackPower, bAttackPower;
+					if(AChoosesFight == true){ aAttackPower = getRandomInt(A.energy); }
+					else{ aAttackPower = 0; }
+					if(BChoosesFight == true){ bAttackPower = getRandomInt(B.energy); }
+					else{ bAttackPower = 0; }
+
+					/* "The critter that rolls higher, wins. If tie, arbitrarily select winner */
+					Critter winner;
+					Critter loser;
+					if(aAttackPower >= bAttackPower){
+						winner = A;
+						loser = B;
+					}
+					else{
+						winner = B;
+						loser = A;
+					}
+
+					/* if critter loser a fight, then half of loser's energy
+					   is awarded to the winner of the fight. The loser is dead.*/
+					winner.energy += loser.energy/2;
+					population.remove(loser);
+				}
+			}
+		}
+	}
+
+
+
+	/**
+	 * Helper function for worldTimeStep method. Finds all
+	 * the critters that share the same spot in the world.
+	 * @return Returns ArrayList of Lists of Critters that
+	 * 		   share the same spot.
+	 */
 	private static ArrayList<List<Critter>> findEncounters(){
 		ArrayList<List<Critter>> encounters_list = new ArrayList<>();
 		/* HashMap to keep track of positions that Critters are in */
@@ -519,54 +581,54 @@ public abstract class Critter {
 	}
 
 
-	/**
-	 * Helper function for worldTimeStep method. Finds all
-	 * the critters that share the same spot in the world.
-	 * @return Returns ArrayList of Lists of Critters that
-	 * 		   share the same spot.
-	 */
+
+
+
 
 	/**
 	 * Display board in grid form (LxW).
 	 */
 	public static void displayWorld() {
-		String[][] board = new String[Params.world_height][Params.world_width];
 
-		/* ASCII display sprite of a Critter */
-		for(Critter critter : population){
-			board[critter.y_coord][critter.x_coord] = critter.toString();
+		/* initialize board dimensions, accounting for the edge marks */
+		String board[][] = new String[Params.world_height + 2][Params.world_width + 2];
+
+		/* display top border */
+		board[0][0] = "+";
+		for (int column = 1; column < Params.world_width + 1; column++) {
+			board[0][column] = "-";
 		}
+		board[0][Params.world_width + 1] = "+";
 
-		/* print top border */
-		displayBorder();
-
-		/* print the critters/empty spaces */
-		for(int columns = 0; columns < Params.world_width; columns++){
-			System.out.print('|');
-			/* if a space is empty, print a space
-			   else print whatever is in it
-			 */
-			for(int rows = 0; rows < Params.world_height; rows++){
-				if(board[columns][rows] == null){
-					System.out.print(' ');
-				}
-				else{
-					System.out.print(board[columns][rows]);
-				}
+		/* display playable spots on the board */
+		for (int row = 1; row < (Params.world_height + 1); row++) {
+			board[row][0] = "|";
+			for (int column = 1; column < (Params.world_width + 1); column++) {
+				board[row][column] = " ";
 			}
-			System.out.println('|');
+			board[row][Params.world_width + 1] = "|";
 		}
 
-		/* print bottom border */
-		displayBorder();
-
-	}
-
-	private static void displayBorder(){
-		System.out.print("+");
-		for(int i = 0; i < Params.world_width; i++) {
-			System.out.print("-");
+		/* display bottom border */
+		board[Params.world_height + 1][0] = "+";
+		for (int column = 1; column < (Params.world_width + 1); column++) {
+			board[Params.world_height + 1][column] = "-";
 		}
-		System.out.println("+");
+		board[Params.world_height + 1][Params.world_width + 1] = "+";
+
+
+		/* prep display all Critters */
+		for (Critter critter : population) {
+			board[critter.y_coord + 1][critter.x_coord + 1] = critter.toString();
+		}
+
+
+		/* display the Critters, if any */
+		for (int row = 0; row < (Params.world_height + 2); row++) {
+			for (int column = 0; column < (Params.world_width + 2); column++) {
+				System.out.print(board[row][column]);
+			}
+			System.out.println("");
+		}
 	}
 }
