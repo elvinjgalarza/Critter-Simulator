@@ -36,6 +36,9 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 
+	private static int time_step = 0;
+	private static boolean fighting = false;
+
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -99,6 +102,9 @@ public abstract class Critter {
 	private final void move(int direction, int steps){
 		int newX = x_coord;
 		int newY = y_coord;
+		/* debugging */
+		System.out.println("Direction: " + direction);
+		System.out.println("Old Coordinate: " + newX + " " + newY);
 
 		switch(direction){
 
@@ -106,7 +112,7 @@ public abstract class Critter {
 			case 0:
 				newX += steps;
 				if(newX >= Params.world_width){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				break;
 
@@ -115,10 +121,10 @@ public abstract class Critter {
 				newX += steps;
 				newY -= steps;
 				if(newX >= Params.world_width){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				if(newY < 0){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
@@ -126,7 +132,7 @@ public abstract class Critter {
 			case 2:
 				newY -= steps;
 				if(newY < 0){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
@@ -135,10 +141,10 @@ public abstract class Critter {
 				newX -= steps;
 				newY -= steps;
 				if(newX < 0){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				if(newY < 0){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
@@ -146,7 +152,7 @@ public abstract class Critter {
 			case 4:
 				newX -= steps;
 				if(newX < 0){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				break;
 
@@ -156,10 +162,10 @@ public abstract class Critter {
 				newY += steps;
 
 				if(newX < 0){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				if(newY >= Params.world_height){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
@@ -167,72 +173,42 @@ public abstract class Critter {
 			case 6:
 				newY += steps;
 				if(newY >= Params.world_height){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
 			/* down-right diagonal */
 			case 7:
-				newY += steps;
 				newX += steps;
+				newY += steps;
 
 				if(newX >= Params.world_width){
-					wrapX(newX);
+					newX = wrapX(newX);
 				}
 				if(newY >= Params.world_height){
-					wrapY(newY);
+					newY = wrapY(newY);
 				}
 				break;
 
 			default:
 				break;
 		}
+
+		if(fighting == false){
+			x_coord = newX;
+			y_coord = newY;
+		}
+		/* debugging */
+		System.out.println("New Coordinate: " + x_coord + " " + y_coord);
+
 	}
 	/* helper functions for move method that wraps
 	   the Critter around the map*/
-	private int wrapX(int pos){
-		/* signals when done with the while loop
-		 * 1 = we entered the pos > 0 loop (Critter fell off the right)
-		 * -1 = we entered the pos < 0 loop (Critter fell off the left) */
-		int flag = 0;
-		while(pos > 0){
-			flag = 1;
-			pos -= Params.world_width;
-		}
-		if(flag == 1){
-			return pos;
-		}
-
-		while(pos < 0){
-			flag = -1;
-			pos += Params.world_width;
-		}
-		if(flag == -1){
-			return pos;
-		}
-		return pos;
+	private int wrapX(int x){
+		return ((x % Params.world_width + Params.world_width) % Params.world_width);
 	}
-	private int wrapY(int pos){
-		/* signals when done with the while loop
-		 * 1 = we entered the pos > 0 loop (Critter fell off bottom)
-		 * -1 = we entered the pos < 0 loop (Critter fell off top) */
-		int flag = 0;
-		while(pos > 0){
-			flag = 1;
-			pos -= Params.world_height;
-		}
-		if(flag == 1){
-			return pos;
-		}
-
-		while(pos < 0){
-			flag = -1;
-			pos += Params.world_height;
-		}
-		if(flag == -1){
-			return pos;
-		}
-		return pos;
+	private int wrapY(int y){
+		return ((y % Params.world_height + Params.world_height) % Params.world_height);
 	}
 
 
@@ -245,12 +221,9 @@ public abstract class Critter {
 	 */
 	protected final void walk(int direction) {
 		this.energy = this.energy - Params.walk_energy_cost;
-		if(moved == true){
-			return;
-		}
-		else{
-			this.move(direction, 1);
+		if(moved == false){
 			moved = true;
+			move(direction, 1);
 		}
 	}
 
@@ -262,14 +235,10 @@ public abstract class Critter {
 	 */
 	protected final void run(int direction) {
 		this.energy = this.energy - Params.run_energy_cost;
-		if(moved == true){
-			return;
-		}
-		else{
-			this.move(direction, 2);
+		if(moved == false){
 			moved = true;
+			move(direction, 2);
 		}
-
 	}
 
 	/**
@@ -465,17 +434,55 @@ public abstract class Critter {
 		 *
 		 */
 
-		/* 1) */
+		/* 1 */
+		time_step++;
+
+		/* 2) */
 		for(Critter critter : population){
 			critter.doTimeStep();
 		}
 
-		/* 2)
-		 * First, find fights.
+		/* 3)
+		 * First, find fights (encounter).
 		 * Then, simulate fighting.
 		 */
+		//doEncounters();
 
+		/* check Critters */
+		for(int i = population.size()-1; i >= 0; i--){
+			Critter checkCritter = population.get(i);
+			checkCritter.energy -=Params.rest_energy_cost;
+			/* remove rekt Critters (dead) */
+			if(checkCritter.energy <= 0){
+				population.remove(i);
+			}
+			checkCritter.moved = false;
+		}
+
+		/* 4*/
+
+
+		/* 5 */
+
+
+		/* 6 */
+		population.addAll(babies);
+		babies.clear();
 	}
+
+	private static void doEncounters(){
+		ArrayList<List<Critter>> encounters = findEncounters();
+	}
+
+
+	private static ArrayList<List<Critter>> findEncounters(){
+		ArrayList<List<Critter>> encounters = new ArrayList<>();
+		HashMap<String, Critter> samePos = new HashMap<>();
+
+
+		return encounters;
+	}
+
 
 	/**
 	 * Helper function for worldTimeStep method. Finds all
@@ -490,8 +497,9 @@ public abstract class Critter {
 	public static void displayWorld() {
 		String[][] board = new String[Params.world_height][Params.world_width];
 
-		for(Critter c : population){
-			System.out.println("DO THIS");
+		/* ASCII display sprite of a Critter */
+		for(Critter critter : population){
+			board[critter.y_coord][critter.x_coord] = critter.toString();
 		}
 
 		/* print top border */
@@ -511,7 +519,7 @@ public abstract class Critter {
 					System.out.print(board[columns][rows]);
 				}
 			}
-			System.out.print('|');
+			System.out.println('|');
 		}
 
 		/* print bottom border */

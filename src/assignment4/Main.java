@@ -44,7 +44,7 @@ public class Main {
      * @param args args can be empty.  If not empty, provide two parameters -- the first is a file name, 
      * and the second is test (for test output, where all output to be directed to a String), or nothing.
      */
-    public static void main(String[] args) { 
+    public static void main(String[] args) {
         if (args.length != 0) {
             try {
                 inputFile = args[0];
@@ -74,49 +74,101 @@ public class Main {
         /* Write your code below. */
 
         while(true){
+            int command = 0;
             int flag = 0;
             /* display the end user prompt */
             System.out.print("critters>");
             /* Create a String array that contains all of the user's input */
-            String user_input = kb.nextLine().toLowerCase();
+            String user_input = kb.nextLine();
             String[] user_input_args = user_input.split("\\s+"); /* strip the whitepsace */
 
             for(int i = 0; i < user_input_args.length; i++){
+
+                /* QUIT */
                 if(user_input_args[i].equals("quit")){
                     flag = 1;
                     break;
                 }
 
+                /* SHOW */
                 if(user_input_args[i].equals("show")){
+                    if(user_input_args.length != 1){
+                        command = 0;
+                        break;
+                    }
+                    command = 1;
                     Critter.displayWorld();
                 }
 
+                /* STEP */
                 if(user_input_args[i].equals("step")){
+                    command = 1;
                     int numSteps = 0;
-
-                    /* if step command is the last command */
-                    if(i == user_input_args.length-1){
+                    /* if count isn't specified */
+                    if(user_input_args.length == 1){
                         numSteps = 1;
                     }
-                    /* if step command isn't the last command */
-                    else{
+                    /* if count is specified */
+                    else if(user_input_args.length == 2){
                         try{
-                            numSteps = Integer.parseInt(user_input_args[i]);
+                            numSteps = Integer.parseInt(user_input_args[1]);
                         }
                         catch(NumberFormatException nfe){
-                            System.out.println("error processing: step " + user_input_args[i+1]);
+                            System.out.println("error processing: " + user_input);
                         }
+                    }
+                    /* if count step is typed with an error */
+                    else{
+                        System.out.println("error processing: " + user_input);
                     }
 
                     /* carry out the steps */
-                    for(int j = 0; j < numSteps; i++){
+                    for(int j = 0; j < numSteps; j++){
                         Critter.worldTimeStep();
                     }
                 }
+
+
+                /* MAKE */
+                if(user_input_args[i].equals("make")){
+                    command = 1;
+                    int numMake = 0;
+                    /* if count isn't specified */
+                    if(user_input_args.length == 2){
+                        numMake = 1;
+                    }
+                    /* if count was specified */
+                    else if(user_input_args.length == 3){
+                        try{
+                            numMake = Integer.parseInt(user_input_args[2]);
+                        }
+                        catch(NumberFormatException nfe){
+                            System.out.println("error processing: " + user_input);
+                        }
+                    }
+
+                    /* carry out making the Critter(s) */
+                    try{
+                        for(int j = 0; j < numMake; j++){
+                            Critter.makeCritter(user_input_args[1]);
+                        }
+                    }
+                    catch(InvalidCritterException ice){
+                        System.out.println("error processing: " + user_input);
+                    }
+                }
+
+
+                /* STILL NEED TO DO STATS */
+
             }
             /* if quit flag was set, terminate program */
             if(flag == 1){
                 break;
+            }
+            if(command == 0){
+                System.out.println("invalid command: " + user_input);
+
             }
         }
 
