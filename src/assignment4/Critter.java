@@ -27,6 +27,10 @@ import java.util.List;
  */
 
 
+/**
+ * Maintains the world's operations and can display it.
+ * All objects extend from this abstract class.
+ */
 public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
@@ -38,10 +42,21 @@ public abstract class Critter {
 	}
 	
 	private static java.util.Random rand = new java.util.Random();
+
+	/**
+	 * Generates a random int from 0 to max - 1
+	 * @param max from setSeed
+	 * @return An int from 0 to max-1
+	 */
 	public static int getRandomInt(int max) {
 		return rand.nextInt(max);
 	}
-	
+
+	/**
+	 * Sets the seed needed for the random number generatro that is used
+	 * in getRandomInt
+	 * @param new_seed The new seed number for the random number generator
+	 */
 	public static void setSeed(long new_seed) {
 		rand = new java.util.Random(new_seed);
 	}
@@ -62,33 +77,172 @@ public abstract class Critter {
 	private boolean moved; /* tells us if the Critter has moved (true) during this time */
 
 
-	/* -------------- */
-
-
 	/**
 	 * This function moves the Critter in a given direction
 	 * and steps. Keep in mind that the map is numbered like
 	 * a matrix ( think: Battleship gameboard). So we start
 	 * from (0,0) and increase in x as we go right and increase
-	 * in y as we go down.
+	 * in y as we go down. Map is a torus (i.e., wraps around like
+	 * Pacman)
 	 * @param direction direction the Critter moves in
-	 *                  0 = straight right(increasing x, no change in y)
-	 *                  1 = diagonally up and to the right (decreasing y, increasing x)
-	 *                  2 = straight up (decreasing y)
+	 *                  Think of a circle and the int represents the radians
+	 *                  0 = straight RIGHT(increasing x, no change in y)
+	 *                  1 = diagonally UP and to the RIGHT(increasing x, decreasing y)
+	 *                  2 = straight UP (unchanged x, decreasing y)
+	 *                  3 = diagonally UP and to the LEFT(decreasing x, decreasing y)
+	 *                  4 = straight LEFT (decreasing x, unchanged y)
+	 *                  5 = diagonally DOWN and to the LEFT (decreasing x, increasing y)
+	 *                  6 = straight DOWN (unchanged x, increasing y)
+	 *                  7 = diagonally DOWN and to the RIGHT (increasing x, increasing y)
 	 * @param steps amount of steps the Critter takes
 	 */
 	private final void move(int direction, int steps){
 		int newX = x_coord;
 		int newY = y_coord;
 
+		switch(direction){
+
+			/* right */
+			case 0:
+				newX += steps;
+				if(newX >= Params.world_width){
+					wrapX(newX);
+				}
+				break;
+
+			/* right-up diagonal */
+			case 1:
+				newX += steps;
+				newY -= steps;
+				if(newX >= Params.world_width){
+					wrapX(newX);
+				}
+				if(newY < 0){
+					wrapY(newY);
+				}
+				break;
+
+			/* up */
+			case 2:
+				newY -= steps;
+				if(newY < 0){
+					wrapY(newY);
+				}
+				break;
+
+			/* left-up diagonal */
+			case 3:
+				newX -= steps;
+				newY -= steps;
+				if(newX < 0){
+					wrapX(newX);
+				}
+				if(newY < 0){
+					wrapY(newY);
+				}
+				break;
+
+			/* left */
+			case 4:
+				newX -= steps;
+				if(newX < 0){
+					wrapX(newX);
+				}
+				break;
+
+			/* down-left diagonal */
+			case 5:
+				newX -= steps;
+				newY += steps;
+
+				if(newX < 0){
+					wrapX(newX);
+				}
+				if(newY >= Params.world_height){
+					wrapY(newY);
+				}
+				break;
+
+			/* down */
+			case 6:
+				newY += steps;
+				if(newY >= Params.world_height){
+					wrapY(newY);
+				}
+				break;
+
+			/* down-right diagonal */
+			case 7:
+				newY += steps;
+				newX += steps;
+
+				if(newX >= Params.world_width){
+					wrapX(newX);
+				}
+				if(newY >= Params.world_height){
+					wrapY(newY);
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+	/* helper functions for move method that wraps
+	   the Critter around the map*/
+	private int wrapX(int pos){
+		/* signals when done with the while loop
+		 * 1 = we entered the pos > 0 loop (Critter fell off the right)
+		 * -1 = we entered the pos < 0 loop (Critter fell off the left) */
+		int flag = 0;
+		while(pos > 0){
+			flag = 1;
+			pos -= Params.world_width;
+		}
+		if(flag == 1){
+			return pos;
+		}
+
+		while(pos < 0){
+			flag = -1;
+			pos += Params.world_width;
+		}
+		if(flag == -1){
+			return pos;
+		}
+		return pos;
+	}
+	private int wrapY(int pos){
+		/* signals when done with the while loop
+		 * 1 = we entered the pos > 0 loop (Critter fell off bottom)
+		 * -1 = we entered the pos < 0 loop (Critter fell off top) */
+		int flag = 0;
+		while(pos > 0){
+			flag = 1;
+			pos -= Params.world_height;
+		}
+		if(flag == 1){
+			return pos;
+		}
+
+		while(pos < 0){
+			flag = -1;
+			pos += Params.world_height;
+		}
+		if(flag == -1){
+			return pos;
+		}
+		return pos;
 	}
 
 
 
-
-	/* ------------- */
-
-
+	/**
+	 * Simulates a Critter's walk operation.
+	 * Uses specified direction to move a tile.
+	 * Reduces energy from Critter.
+	 * @param direction int that represents a certain direction
+	 */
 	protected final void walk(int direction) {
 		this.energy = this.energy - Params.walk_energy_cost;
 		if(moved == true){
@@ -99,12 +253,50 @@ public abstract class Critter {
 			moved = true;
 		}
 	}
-	
+
+	/**
+	 * Simulates a Critter's run operation.
+	 * Uses specific direction to move two tiles.
+	 * Reduces energy from Critter.
+	 * @param direction
+	 */
 	protected final void run(int direction) {
-		
+		this.energy = this.energy - Params.run_energy_cost;
+		if(moved == true){
+			return;
+		}
+		else{
+			this.move(direction, 2);
+			moved = true;
+		}
+
 	}
-	
+
+	/**
+	 * Simulates reproducing Critters.
+	 * Creates a new Critter object by expending parent's energy
+	 * if there is enough energy to use. Child gets half of parent's
+	 * original energy (rounded down) and parent is obviously left with
+	 * the remaining half (rounded up). Child is placed adjacent to
+	 * parent (specified by direction), and is encounter-immune. Babies
+	 * are not added to general population until after timestep is finished.
+	 * So technically the baby is not existing yet, but is prepped.
+	 * @param offspring
+	 * @param direction
+	 */
 	protected final void reproduce(Critter offspring, int direction) {
+		if(this.energy >= Params.min_reproduce_energy){
+			offspring.energy = this.energy/2; /* give offspring energy */
+			this.energy -= offspring.energy; /* give parent modified energy */
+
+			/* place offspring adjacent to parent */
+			offspring.x_coord = this.x_coord;
+			offspring.y_coord = this.y_coord;
+			offspring.move(direction, 1);
+
+			/* add offspring to babies */
+			babies.add(offspring);
+		}
 	}
 
 	public abstract void doTimeStep();
