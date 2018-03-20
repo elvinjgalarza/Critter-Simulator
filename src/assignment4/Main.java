@@ -15,6 +15,7 @@ package assignment4;
  *
  */
 
+import java.util.List;
 import java.util.Scanner;
 import java.io.*;
 
@@ -133,6 +134,10 @@ public class Main {
                 if(user_input_args[i].equals("make")){
                     command = 1;
                     int numMake = 0;
+                    /* if nothing was specified */
+                    if(user_input_args.length == 1){
+                        System.out.println("error processing: " + user_input);
+                    }
                     /* if count isn't specified */
                     if(user_input_args.length == 2){
                         numMake = 1;
@@ -160,6 +165,25 @@ public class Main {
 
 
                 /* STILL NEED TO DO STATS */
+                if(user_input_args[i] == "stats"){
+                    if(user_input_args.length == 1){
+                        System.out.println("error processing: " + user_input);
+                    }
+                    else if(user_input_args.length == 2){
+                        try{
+                            List<Critter> statistics = Critter.getInstances(user_input_args[1]);
+                            Class<? extends Critter> stats =
+                                    Class.forName(myPackage + "." + user_input_args[1]).asSubclass(Critter.class);
+                            stats.getMethod("runStats", List.class).invoke(null, statistics);
+                        }
+                        catch(Exception e){
+                            System.out.println("error processing: " + user_input);
+                        }
+                    }
+                    else{
+                        System.out.println("error processing: " + user_input);
+                    }
+                }
 
             }
             /* if quit flag was set, terminate program */

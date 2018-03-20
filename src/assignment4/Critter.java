@@ -101,9 +101,9 @@ public abstract class Critter {
 	private final void move(int direction, int steps){
 		int newX = x_coord;
 		int newY = y_coord;
-		/* debugging */
+		/* debugging
 		System.out.println("Direction: " + direction);
-		System.out.println("Old Coordinate: " + newX + " " + newY);
+		System.out.println("Old Coordinate: " + newX + " " + newY); */
 
 		switch(direction){
 
@@ -197,8 +197,8 @@ public abstract class Critter {
 			x_coord = newX;
 			y_coord = newY;
 		}
-		/* debugging */
-		System.out.println("New Coordinate: " + x_coord + " " + y_coord);
+		/* debugging
+		System.out.println("New Coordinate: " + x_coord + " " + y_coord); */
 	}
 	/* helper functions for move method that wraps
 	   the Critter around the map (TORUS)*/
