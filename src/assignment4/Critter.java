@@ -449,7 +449,7 @@ public abstract class Critter {
 		updateRestEnergy();
 
 		/* 5 */
-		//genAlgae();
+		genAlgae();
 
 		/* 6 */
 		population.addAll(babies);
@@ -495,8 +495,8 @@ public abstract class Critter {
 	private static void battleEncounters(ArrayList<List<Critter>> encounters){
 		for(List<Critter> critter : encounters) {
 
-			Critter A = (Critter) encounters.get(0);
-			Critter B = (Critter) encounters.get(1);
+			Critter A = critter.get(0);
+			Critter B = critter.get(1);
 
 			if (population.contains(A) && population.contains(B)){
 
