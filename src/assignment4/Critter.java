@@ -102,9 +102,9 @@ public abstract class Critter {
 	private final void move(int direction, int steps){
 		int newX = x_coord;
 		int newY = y_coord;
-		/* debugging */
+		/* debugging
 		System.out.println("Direction: " + direction);
-		System.out.println("Old Coordinate: " + newX + " " + newY);
+		System.out.println("Old Coordinate: " + newX + " " + newY); */
 
 		switch(direction){
 
@@ -198,12 +198,11 @@ public abstract class Critter {
 			x_coord = newX;
 			y_coord = newY;
 		}
-		/* debugging */
-		System.out.println("New Coordinate: " + x_coord + " " + y_coord);
-
+		/* debugging
+		System.out.println("New Coordinate: " + x_coord + " " + y_coord); */
 	}
 	/* helper functions for move method that wraps
-	   the Critter around the map*/
+	   the Critter around the map (TORUS)*/
 	private int wrapX(int x){
 		return ((x % Params.world_width + Params.world_width) % Params.world_width);
 	}
@@ -438,49 +437,85 @@ public abstract class Critter {
 		time_step++;
 
 		/* 2) */
-		for(Critter critter : population){
-			critter.doTimeStep();
-		}
+		doTimeSteps();
 
 		/* 3)
 		 * First, find fights (encounter).
 		 * Then, simulate fighting.
 		 */
-		//doEncounters();
-
-		/* check Critters */
-		for(int i = population.size()-1; i >= 0; i--){
-			Critter checkCritter = population.get(i);
-			checkCritter.energy -=Params.rest_energy_cost;
-			/* remove rekt Critters (dead) */
-			if(checkCritter.energy <= 0){
-				population.remove(i);
-			}
-			checkCritter.moved = false;
-		}
+		doEncounters();
 
 		/* 4*/
-
+		/* checks Critter: allows for removing death critters, energy upkeep, enables Critter to move again */
+		updateRestEnergy();
 
 		/* 5 */
-
+		genAlgae();
 
 		/* 6 */
 		population.addAll(babies);
 		babies.clear();
 	}
 
+	private static void doTimeSteps(){
+		for(Critter critter : population){
+			critter.doTimeStep();
+		}
+	}
+	private static void updateRestEnergy(){
+		for(int i = population.size()-1; i >= 0; i--){
+			Critter checkCritter = population.get(i);
+			checkCritter.energy -= Params.rest_energy_cost;
+			/* remove rekt Critters (dead) */
+			if(checkCritter.energy <= 0){
+				population.remove(i);
+			}
+			checkCritter.moved = false;
+		}
+	}
+	private static void genAlgae(){
+		for(int i = 0; i < Params.refresh_algae_count; i++){
+			try{
+				makeCritter("Algae");
+			}
+			catch(InvalidCritterException ice){
+				System.out.println("error generating Critter: Algae");
+			}
+		}
+	}
 	private static void doEncounters(){
+		fighting = true;
 		ArrayList<List<Critter>> encounters = findEncounters();
+		
 	}
 
 
 	private static ArrayList<List<Critter>> findEncounters(){
-		ArrayList<List<Critter>> encounters = new ArrayList<>();
-		HashMap<String, Critter> samePos = new HashMap<>();
+		ArrayList<List<Critter>> encounters_list = new ArrayList<>();
+		/* HashMap to keep track of positions that Critters are in */
+		HashMap<String, Critter> critter_positions = new HashMap<>();
 
+		for(Critter critter : population){
+			/* create a coordinate key for the HashMap */
+			String key = String.format("%d %d", critter.x_coord, critter.y_coord);
 
-		return encounters;
+			/* if a battle is about to happen */
+			if(critter_positions.containsKey(key)){
+				ArrayList<Critter> battle_spot = new ArrayList<>();
+
+				/* add both Critters to the battle ground instance */
+				battle_spot.add(critter);
+				battle_spot.add(critter_positions.get(key));
+
+				/* add to encounter instance to the list of encounters*/
+				encounters_list.add(battle_spot);
+			}
+			/* if no battle found yet */
+			else{
+				critter_positions.put(key, critter);
+			}
+		}
+		return encounters_list;
 	}
 
 
