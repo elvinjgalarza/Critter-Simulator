@@ -76,7 +76,6 @@ public abstract class Critter {
 	private int y_coord;
 	/* my variables */
 	private static int time_step = 0; /* time step counter */
-	private static boolean fighting = false; /* tells us if the Critter is fighting (true if so) during this time step*/
 	private boolean moved; /* tells us if the Critter has moved (true if so) during this time step */
 
 	/**
@@ -193,10 +192,9 @@ public abstract class Critter {
 				break;
 		}
 
-		if(fighting == false){
-			x_coord = newX;
-			y_coord = newY;
-		}
+		x_coord = newX;
+		y_coord = newY;
+
 		/* debugging
 		System.out.println("New Coordinate: " + x_coord + " " + y_coord); */
 	}
@@ -218,11 +216,11 @@ public abstract class Critter {
 	 * @param direction int that represents a certain direction
 	 */
 	protected final void walk(int direction) {
-		this.energy = this.energy - Params.walk_energy_cost;
 		if(moved == false){
 			move(direction, 1);
 			moved = true;
 		}
+		energy = energy - Params.walk_energy_cost;
 	}
 
 	/**
@@ -232,11 +230,11 @@ public abstract class Critter {
 	 * @param direction
 	 */
 	protected final void run(int direction) {
-		this.energy = this.energy - Params.run_energy_cost;
 		if(moved == false){
 			move(direction, 2);
 			moved = true;
 		}
+		energy = energy - Params.run_energy_cost;
 	}
 
 	/**
@@ -484,10 +482,8 @@ public abstract class Critter {
 		}
 	}
 	private static void doEncounters(){
-		fighting = true;
 		ArrayList<List<Critter>> encounters = findEncounters();
 		battleEncounters(encounters);
-		fighting = false;
 	}
 
 
@@ -517,7 +513,9 @@ public abstract class Critter {
 				/* if no one died, and CrittersA/B are on same spot still,
 				   then generate two random numbers via dice roll */
 				if(critterDied == false && A.x_coord == B.x_coord && A.y_coord == B.y_coord){
-					int aAttackPower, bAttackPower;
+					int aAttackPower;
+					int bAttackPower;
+
 
 					if(AChoosesFight == true){
 						aAttackPower = getRandomInt(A.energy);
