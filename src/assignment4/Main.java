@@ -93,12 +93,13 @@ public class Main {
 
                 /* SHOW */
                 if(user_input_args[i].equals("show")){
-                    if(user_input_args.length != 1){
-                        command = 0;
-                        break;
-                    }
                     command = 1;
-                    Critter.displayWorld();
+                    if(user_input_args.length != 1){
+                        System.out.println("error processing: " + user_input);
+                    }
+                    else{
+                        Critter.displayWorld();
+                    }
                 }
 
                 /* STEP */
@@ -143,13 +144,16 @@ public class Main {
                         numMake = 1;
                     }
                     /* if count was specified */
-                    else if(user_input_args.length == 3){
+                    if(user_input_args.length == 3){
                         try{
                             numMake = Integer.parseInt(user_input_args[2]);
                         }
                         catch(NumberFormatException nfe){
                             System.out.println("error processing: " + user_input);
                         }
+                    }
+                    if(user_input_args.length > 3){
+                        System.out.println("error processing: " + user_input);
                     }
 
                     /* carry out making the Critter(s) */
@@ -164,8 +168,9 @@ public class Main {
                 }
 
 
-                /* STILL NEED TO DO STATS */
-                if(user_input_args[i] == "stats"){
+                /* STATS */
+                if(user_input_args[i].equals("stats")){
+                    command = 1;
                     if(user_input_args.length == 1){
                         System.out.println("error processing: " + user_input);
                     }
@@ -177,6 +182,22 @@ public class Main {
                             stats.getMethod("runStats", List.class).invoke(null, statistics);
                         }
                         catch(Exception e){
+                            System.out.println("error processing: " + user_input);
+                        }
+                    }
+                    else{
+                        System.out.println("error processing: " + user_input);
+                    }
+                }
+
+                /* SEED */
+                if(user_input_args[i].equals("seed")){
+                    command = 1;
+                    if(user_input_args.length == 2){
+                        try{
+                            Critter.setSeed(Integer.parseInt(user_input_args[1]));
+                        }
+                        catch(NumberFormatException nfe){
                             System.out.println("error processing: " + user_input);
                         }
                     }

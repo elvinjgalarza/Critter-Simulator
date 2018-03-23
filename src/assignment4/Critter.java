@@ -501,7 +501,7 @@ public abstract class Critter {
 			if (population.contains(A) && population.contains(B)){
 
 				boolean AChoosesFight = A.fight(B.toString());
-				boolean BChoosesFight = B.fight(B.toString());
+				boolean BChoosesFight = B.fight(A.toString());
 				boolean critterDied = false;
 
 				/* check if CrittersA/B died from fight */
@@ -518,10 +518,22 @@ public abstract class Critter {
 				   then generate two random numbers via dice roll */
 				if(critterDied == false && A.x_coord == B.x_coord && A.y_coord == B.y_coord){
 					int aAttackPower, bAttackPower;
-					if(AChoosesFight == true){ aAttackPower = getRandomInt(A.energy); }
-					else{ aAttackPower = 0; }
-					if(BChoosesFight == true){ bAttackPower = getRandomInt(B.energy); }
-					else{ bAttackPower = 0; }
+
+					if(AChoosesFight == true){
+						aAttackPower = getRandomInt(A.energy);
+					}
+					/* A wants to run away */
+					else{
+						aAttackPower = 0;
+					}
+
+					if(BChoosesFight == true){
+						bAttackPower = getRandomInt(B.energy);
+					}
+					/* B wants to run away */
+					else{
+						bAttackPower = 0;
+					}
 
 					/* "The critter that rolls higher, wins. If tie, arbitrarily select winner */
 					Critter winner;
@@ -535,7 +547,7 @@ public abstract class Critter {
 						loser = A;
 					}
 
-					/* if critter loser a fight, then half of loser's energy
+					/* if critter loses a fight, then half of loser's energy
 					   is awarded to the winner of the fight. The loser is dead.*/
 					winner.energy += loser.energy/2;
 					population.remove(loser);
